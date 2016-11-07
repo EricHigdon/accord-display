@@ -12,7 +12,6 @@ class Application(tk.Frame):
         root.overrideredirect(True)
         root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
         root.focus_set()  # <-- move focus to this widget
-        root.bind("<Escape>", lambda e: e.widget.quit())
         self.pack(fill=tk.BOTH)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.index = 0
@@ -31,8 +30,9 @@ class Application(tk.Frame):
 
     def animate(self):
         if self.ready:
-            self.label.config(image=self.photos[self.index]['image'])
-            self.label.image=self.photos[self.index]['image']
+            img = ImageTk.PhotoImage(file=self.photos[self.index]['image'])
+            self.label.config(image=img)
+            self.label.image=img
             if self.index >= len(self.photos)-1:
                 self.index = 0
             else:
@@ -62,12 +62,13 @@ class Application(tk.Frame):
             alpha = 0
             while alpha <= 1:
                 img = Image.blend(img1, img2, alpha)
-                img_obj = ImageTk.PhotoImage(img)
+                img_name = 'slides/slide' + str(anim_index) + str(alpha) + '.jpg'
+                img.save(img_name)
                 if alpha == 0:
                     original = True
                 else:
                     original = False
-                self.photos.append({'image': img_obj, 'wait': original})
+                self.photos.append({'image': img_name, 'wait': original})
                 alpha += .1
         self.ready = True
         self.after(3000, self.get_slides)
