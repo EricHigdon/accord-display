@@ -4,6 +4,7 @@ from threading import Thread
 import tkinter as tk
 import time
 import os
+import shutil
 import requests
 
 class Application(tk.Frame):
@@ -49,6 +50,14 @@ class Application(tk.Frame):
     def get_slides(self):
         url = 'http://accordapp.com/display/slides'
         headers = {'AUTHORIZATION': 'Basic ZndiYzpMMHYzVzBya3M='}
+        folder = 'slides'
+        for the_file in os.listdir(folder):
+            file_path = os.path.join(folder, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
         response = requests.get(url, headers=headers)
         data = response.json()
         anim_index = 0
@@ -71,7 +80,7 @@ class Application(tk.Frame):
                 self.photos.append({'image': img_name, 'wait': original})
                 alpha += .1
         self.ready = True
-        self.after(3000, self.get_slides)
+        self.after(600000, self.get_slides)
 
     def get_img(self, url):
         img_response = requests.get(url.replace('https', 'http'))
