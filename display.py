@@ -10,9 +10,9 @@ import requests
 class Application(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self,parent)
-        #root.overrideredirect(True)
-        #root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
-        #root.focus_set()  # <-- move focus to this widget
+        root.overrideredirect(True)
+        root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
+        root.focus_set()  # <-- move focus to this widget
         self.pack(fill=tk.BOTH)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.index = 0
@@ -41,7 +41,7 @@ class Application(tk.Frame):
             if self.photos[self.index]['wait']:
                 self.after(10000, self.animate)
             else:
-                self.after(10, self.animate)
+                self.after(1, self.animate)
         else:
             self.label.config(image=self.logo_obj)
             self.label.image=self.logo_obj
@@ -61,17 +61,22 @@ class Application(tk.Frame):
                 img2 = self.get_img(data[anim_index]['image'])
             except IndexError:
                 img2 = self.get_img(data[0]['image'])
-            alpha = 0
-            while alpha <= 1:
-                img = Image.blend(img1, img2, alpha)
-                img_name = 'slides/slide' + str(anim_index) + str(alpha) + '.jpg'
-                img.save(img_name)
-                if alpha == 0:
-                    original = True
-                else:
-                    original = False
-                self.photos.append({'image': img_name, 'wait': original})
-                alpha += .1
+            if animation is not None:
+                alpha = 0
+                while alpha <= 1:
+                    img = Image.blend(img1, img2, alpha)
+                    img_name = 'slides/slide' + str(anim_index) + str(alpha) + '.jpg'
+                    img.save(img_name)
+                    if alpha == 0:
+                        original = True
+                    else:
+                        original = False
+                    self.photos.append({'image': img_name, 'wait': original})
+                    alpha += .1
+            else:
+                image_name = 'slides/slide'+str(anim_index)+'.jpg'
+                img1.save(image_name)
+                self.photos.append({'image': image_name, 'wait': True})
         self.ready = True
         self.after(600000, self.get_slides)
 
@@ -95,6 +100,7 @@ class Application(tk.Frame):
         self.empty_slides_folder()
         os._exit(0)
 
+animation = None
 root = tk.Tk()
 app = Application(root)
 
