@@ -10,9 +10,9 @@ import requests
 class Application(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self,parent)
-        root.overrideredirect(True)
-        root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
-        root.focus_set()  # <-- move focus to this widget
+        #root.overrideredirect(True)
+        #root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
+        #root.focus_set()  # <-- move focus to this widget
         self.pack(fill=tk.BOTH)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.index = 0
@@ -50,16 +50,9 @@ class Application(tk.Frame):
     def get_slides(self):
         url = 'http://accordapp.com/display/slides'
         headers = {'AUTHORIZATION': 'Basic ZndiYzpMMHYzVzBya3M='}
-        folder = 'slides'
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                print(e)
         response = requests.get(url, headers=headers)
         data = response.json()
+        self.empty_slides_folder()
         anim_index = 0
         while anim_index < len(data):
             img1 = self.get_img(data[anim_index]['image'])
@@ -88,7 +81,18 @@ class Application(tk.Frame):
         img = img.resize((1920, 1080))
         return img
 
+    def empty_slides_folder(self):
+        folder = 'slides'
+        for the_file in os.listdir(folder):
+            file_path = os.path.join(folder, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
+
     def close(self):
+        self.empty_slides_folder()
         os._exit(0)
 
 root = tk.Tk()
