@@ -14,6 +14,7 @@ class Application(tk.Frame):
         root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
         root.focus_set()  # <-- move focus to this widget
         self.pack(fill=tk.BOTH)
+        root.bind('<escape>', self.close)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.index = 0
         self.ready = False
