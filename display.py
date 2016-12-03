@@ -83,7 +83,7 @@ class Application(tk.Frame):
     def get_img(self, url):
         img_response = requests.get(url.replace('https', 'http'))
         img = Image.open(BytesIO(img_response.content))
-        img = img.resize((1920, 1080))
+        img = img.resize((1024, 768))
         return img
 
     def empty_slides_folder(self):
