@@ -78,7 +78,7 @@ class Application(tk.Frame):
                 img1.save(image_name)
                 self.photos.append({'image': image_name, 'wait': True})
         self.ready = True
-        self.after(600000, self.get_slides)
+        self.after(60000, self.get_slides)
 
     def get_img(self, url):
         img_response = requests.get(url.replace('https', 'http'))
