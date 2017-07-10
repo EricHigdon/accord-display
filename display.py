@@ -56,37 +56,21 @@ class Application(tk.Frame):
             if time_left < timedelta(minutes=5) and time_left > timedelta():
                 minutes = int(time_left.seconds/60)
                 seconds = time_left.seconds - minutes * 60
-                options = {}
+                options = []
                 if self.countdown_position == 'topleft':
-                    options = {
-                        'x': 5,
-                        'y': 5
-                    }
+                    options = [5, 5 ]
                 elif self.countdown_position == 'topright':
-                    options = {
-                        'x': 5,
-                        'y': self.width-5
-                    }
+                    options = [ 5, self.width-5 ]
                 elif self.countdown_position == 'center':
-                    options = {
-                        'x': 0,
-                        'y': 0,
-                        'anchor': 'center'
-                    }
+                    options = [ 0, 0, ]
                 elif self.countdown_position == 'bottomleft':
-                    options = {
-                        'x': self.height-5,
-                        'y': 5
-                    }
+                    options = [ self.height-5, 5 ]
                 elif self.countdown_position == 'bottomright':
-                    options = {
-                        'x': self.height-5,
-                        'y': self.widht-5
-                    }
+                    options = [ self.height-5, self.widht-5 ]
                 self.canvas.itemconfig(
                     self.timeleft,
                     text='{}:{:02d}'.format(minutes, seconds),
-                    **options
+                    *options
                 )
 
                 # Display the countdown image
@@ -155,9 +139,9 @@ class Application(tk.Frame):
         countdown_url = getattr(settings, 'COUNTDOWN_URL', 'http://accordapp.com/display/countdown')
         response = requests.get(countdown_url, headers=headers).json()
         self.countdown_to = datetime.strptime(response[0]['countdown'], '%Y-%m-%dT%H:%M:%S') 
-        img_url = response[0]['countdown_image']
+        img_url = response[0]['image']
         if img_url is not None:
-            image = self.get_img()
+            image = self.get_img(img_url)
             self.countdown_image = 'slides/slide'+str(anim_index)+'.jpg'
             image.save(self.countdown_image)
             self.countdown_position = response[0]['countdown_position']
