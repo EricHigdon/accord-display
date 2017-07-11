@@ -10,25 +10,27 @@ import settings
 from datetime import datetime, timedelta
 
 class Application(tk.Frame):
+    photos = []
+    countdown_to = None
+    counting_down = False
+    countdown_image = None
+    countdown_position = None
+    timeleft = None
+    index = 0
+    ready = False
+
     def __init__(self, parent):
         tk.Frame.__init__(self,parent)
-        root.overrideredirect(True)
         self.width = getattr(settings, 'WIDTH', root.winfo_screenwidth())
         self.height = getattr(settings, 'HEIGHT', root.winfo_screenheight()) 
+        root.overrideredirect(True)
         root.geometry("{0}x{1}+0+0".format(self.width, self.height))
         root.focus_set()  # <-- move focus to this widget
         self.pack(fill=tk.BOTH)
         root.protocol("WM_DELETE_WINDOW", self.close)
-        self.index = 0
-        self.ready = False
         logo = Image.open('slide1.jpg')
         logo = logo.resize((self.width, self.height))
         self.logo_obj = ImageTk.PhotoImage(logo)
-        self.photos = []
-        self.countdown_to = None
-        self.counting_down = False
-        self.countdown_image = None
-        self.countdown_position = None
 
         self.create_canvas()
         
@@ -41,11 +43,6 @@ class Application(tk.Frame):
             anchor='nw',
             image=self.logo_obj
         )
-        self.timeleft = self.canvas.create_text(
-            self.width-5,
-            self.height-2,
-            anchor="se",
-        )
         Thread(target=self.get_slides).start()
         Thread(target=self.animate).start()
         Thread(target=self.countdown).start()
@@ -56,30 +53,54 @@ class Application(tk.Frame):
             if time_left < timedelta(minutes=5) and time_left > timedelta():
                 minutes = int(time_left.seconds/60)
                 seconds = time_left.seconds - minutes * 60
-                options = []
-                if self.countdown_position == 'topleft':
-                    options = [5, 5 ]
-                elif self.countdown_position == 'topright':
-                    options = [ 5, self.width-5 ]
-                elif self.countdown_position == 'center':
-                    options = [ 0, 0, ]
-                elif self.countdown_position == 'bottomleft':
-                    options = [ self.height-5, 5 ]
-                elif self.countdown_position == 'bottomright':
-                    options = [ self.height-5, self.widht-5 ]
-                self.canvas.itemconfig(
-                    self.timeleft,
-                    text='{}:{:02d}'.format(minutes, seconds),
-                    *options
-                )
-
+                if self.timeleft is not None:
+                    self.canvas.itemconfig(
+                        self.timeleft,
+                        text='{}:{:02d}'.format(minutes, seconds),
+                    )
+                else:
+                    options = []
+                    anchor = 'nw'
+                    if self.countdown_position == 'topleft':
+                        options = [5, 5]
+                    if self.countdown_position == 'topcenter':
+                        options = [5, self.width/2]
+                        anchor = 'n'
+                    elif self.countdown_position == 'topright':
+                        options = [5, self.width-5]
+                        anchor = 'ne'
+                    if self.countdown_position == 'centerleft':
+                        options = [self.height/2, 5]
+                        anchor = 'w'
+                    elif self.countdown_position == 'center':
+                        options = [self.width/2, self.height/2,]
+                        anchor = 'center'
+                    if self.countdown_position == 'centerright':
+                        options = [self.height/2, self.width-5]
+                        anchor = 'e'
+                    elif self.countdown_position == 'bottomleft':
+                        options = [self.height-5, 5]
+                        anchor = 'sw'
+                    elif self.countdown_position == 'bottomcenter':
+                        options = [self.height-5, self.width/2]
+                        anchor = 's'
+                    elif self.countdown_position == 'bottomright':
+                        options = [self.height-5, self.width-5]
+                        anchor = 'se'
+                    self.timeleft = self.canvas.create_text(
+                        *options,
+                        anchor=anchor,
+                        fill='white',
+                        text='{}:{:02d}'.format(minutes, seconds),
+                    )
                 # Display the countdown image
                 self.counting_down = True
                 global img
                 img = ImageTk.PhotoImage(file=self.countdown_image)
                 self.canvas.itemconfig(self.image, image=img)
             else:
-                self.canvas.itemconfig(self.timeleft, text='')
+                self.canvas.delete(self.timeleft)
+                self.timeleft = None
                 self.counting_down = False
         self.after(1000, self.countdown)
         
@@ -101,6 +122,8 @@ class Application(tk.Frame):
             else:
                 self.canvas.itemconfig(self.image, image=self.logo_obj)
                 self.after(5000, self.animate)
+        else:
+            self.after(10*3600, self.animate)
 
     def get_slides(self):
         url = getattr(settings, 'SLIDES_URL', 'http://accordapp.com/display/slides')
